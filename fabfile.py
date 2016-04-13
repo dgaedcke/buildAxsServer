@@ -1,17 +1,17 @@
+import time
+
+from contextlib import contextmanager as _contextmanager
+
+import yaml
+
 from fabric.api import *
 from fabric.context_managers import settings
 from fabric.contrib.project import rsync_project
 from fabric.decorators import roles
 from fabric.api import run, cd, env, roles, lcd
-from contextlib import contextmanager as _contextmanager
 from fabric.contrib.files import exists
-from pprint import pprint
-from time import sleep
-import time
-import yaml
-import fabric
 
-config_dir = '/var/www/cap/examiner/current/payments/config/'
+config_dir = './'
 
 env.directory = '/opt/paysys/current'
 env.activate = 'source /opt/paysys/python/bin/activate'
