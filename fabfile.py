@@ -11,9 +11,6 @@ from fabric.decorators import roles
 from fabric.api import run, cd, env, roles, lcd
 from fabric.contrib.files import exists
 
-config_dir = './'
-
-env.directory = '/opt/paysys/current'
 env.activate = 'source /opt/paysys/python/bin/activate'
 app_user = 'paysys'
 
@@ -23,11 +20,13 @@ def virtualenv():
         yield
 
 # Loads an environment from a yaml config and stores in env.config
-def loadenv(environment = ''):
+def loadenv(environment=None):
     """Loads an environment config file for role definitions"""
-    with open(config_dir + environment + '.yaml', 'r') as f:
-        env.config = yaml.load(f)
-        env.roledefs = env.config['roledefs']
+    if environment:
+        with open('./%s.yml' % environment, 'r') as f:
+            yaml_config = yaml.load(f)
+            for key, value in yaml_config.iteritems():
+                setattr(env, key, value)
 
 @roles('application')
 def setup(wipe=False):
@@ -35,34 +34,29 @@ def setup(wipe=False):
     wipe = bool(wipe)
     if wipe or not exists('/opt/paysys'):
         sudo('rm -rf /opt/paysys')
-    sudo('mkdir -p /opt/paysys')
-    sudo('chown ' + env.user + ':' + env.user + ' /opt/paysys')
+    sudo('useradd -d /opt/paysys %s || true' % app_user)
+    sudo('yum install -q -y wget build-essential git openssl-devel zlib-devel python-virtualenv')
     if not exists('/opt/python2.7'):
         with cd('/tmp'):
             run('wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz')
-            run('tar -zxf Python-2.7.8.tgz')
+            run('wget https://bootstrap.pypa.io/get-pip.py')
+            run('tar -xf Python-2.7.8.tgz')
         with cd('/tmp/Python-2.7.8'):
             run('./configure --prefix=/opt/python2.7')
-            run('make')
+            run('make -j4')
             sudo('make install')
-    if not exists('/opt/paysys/python'):
-        run('virtualenv -p /opt/python2.7/bin/python /opt/paysys/python')
-    sudo('chown ' + env.user + ':' + env.user + ' /opt/paysys')
-    run('mkdir -p /opt/paysys/logs')
-    sudo('chown ' + app_user + ':' + app_user + ' /opt/paysys/logs')
-    run('mkdir -p /opt/paysys/beat')
-    sudo('chown ' + app_user + ':' + app_user + ' /opt/paysys/beat')
-    run('mkdir -p /opt/paysys/uploads')
-    sudo('chown ' + app_user + ':' + app_user + ' /opt/paysys/uploads')
-    if not exists('/opt/paysys/rules'):
-        run('mkdir -p /opt/paysys/rules')
-        sudo('chown -R ' + app_user + ':' + app_user + ' /opt/paysys/rules')
-    with virtualenv():
-        run('pip install gunicorn supervisor')
+
+    with settings(sudo_user=app_user):
+        if not exists('/opt/paysys/python'):
+            sudo('virtualenv -p /opt/python2.7/bin/python /opt/paysys/python')
+        sudo('mkdir -p /opt/paysys/{logs,beat,uploads,rules} || true')
+        with virtualenv():
+            sudo('pip install gunicorn supervisor')
+
     sudo('mkdir -p /etc/supervisor.d')
-    put(config_dir + '/files/supervisord-init', '/etc/init.d/supervisord', use_sudo=True, mode=0755)
-    put(config_dir + '/files/supervisord.conf', '/etc/supervisord.conf', use_sudo=True)
-    sudo('/sbin/service supervisord start')
+    put('./files/supervisord-init', '/etc/init.d/supervisord', use_sudo=True, mode=0755)
+    put('./files/supervisord.conf', '/etc/supervisord.conf', use_sudo=True)
+    sudo('service supervisord start')
     sudo('chkconfig supervisord on')
 
 @roles('application')
