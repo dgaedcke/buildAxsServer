@@ -1,3 +1,4 @@
+import os
 import time
 
 from contextlib import contextmanager as _contextmanager
@@ -80,6 +81,13 @@ def setup(wipe=False):
     sudo('mysqladmin create pay')
     sudo('mysql -e \'GRANT ALL ON pay.* TO `payApp`@localhost IDENTIFIED BY "apple1010"\'')
 
+    sudo('mysqladmin create paysys')
+
+    if env.get('sql_seedfile', False):
+        if os.path.exists(sql_seedfile):
+            put(sql_seedfile, '/tmp/seedDB.sql')
+            sudo('mysql paysys < seedDB.sql')
+
 @roles('application')
 def deploy(version='master'):
     """Deploys payment code to application server"""
@@ -91,10 +99,10 @@ def deploy(version='master'):
     sudo('chown -R %s. /opt/paysys/.ssh' % app_user)
 
     with settings(sudo_user=app_user), cd('/opt/paysys'):
-        # TODO(dw): rm -rf first?
         sudo('ssh-keyscan github.com >> ~/.ssh/known_hosts')
         sudo('git clone git@github.com:dgaedcke/paymentSystem.git /opt/paysys/current')
         with cd('/opt/paysys/current'):
+            sudo('git checkout %s' % version)
             with virtualenv():
                 sudo('pip install -r requirements/common.txt')
         with cd('/opt/paysys/current/source'):
