@@ -78,15 +78,13 @@ def setup(wipe=False):
     sudo('chkconfig rabbitmq-server on')
     sudo('service mysqld start')
     sudo('chkconfig mysqld on')
-    sudo('mysqladmin create pay')
+
+    sudo('mysql -e \'CREATE DATABASE `pay` CHARACTER SET utf8 COLLATE utf8_general_ci\'')
     sudo('mysql -e \'GRANT ALL ON pay.* TO `payApp`@localhost IDENTIFIED BY "apple1010"\'')
-
-    sudo('mysqladmin create paysys')
-
     if env.get('sql_seedfile', False):
-        if os.path.exists(sql_seedfile):
-            put(sql_seedfile, '/tmp/seedDB.sql')
-            sudo('mysql paysys < seedDB.sql')
+        if os.path.exists(env.sql_seedfile):
+            put(env.sql_seedfile, '/tmp/seedDB.sql')
+            sudo('mysql paysys < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
 
 @roles('application')
 def deploy(version='master'):

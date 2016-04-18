@@ -39,3 +39,7 @@
     ```
     $ vagrant destroy
     ```
+
+## Database seedfile
+
+If `sql_seedfile` is specified in the `dev.yml` config, the file at this path will be uploaded and imported to the `pay` database before deploying the application.
