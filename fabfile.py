@@ -85,7 +85,7 @@ def setup(wipe=False):
     if env.get('sql_seedfile', False):
         if os.path.exists(env.sql_seedfile):
             put(env.sql_seedfile, '/tmp/seedDB.sql')
-            sudo('mysql pay < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
+            sudo('mysql paysys < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
 
 @roles('application')
 def deploy(version='master'):
@@ -109,6 +109,7 @@ def deploy(version='master'):
                 sudo('pip install --editable .')
         if not exists('/opt/paysys/rules/__init__.py'):
             sudo('/bin/cp -r /opt/paysys/current/rules-initial/* /opt/paysys/rules/')
+        sudo('rm -rf /opt/paysys/current/source/rules')
         sudo('ln -sf /opt/paysys/rules /opt/paysys/current/source/rules')
 
     put('./files/supervisor-payment.conf', '/etc/supervisor.d/payment.conf', use_sudo=True)
@@ -119,7 +120,6 @@ def deploy(version='master'):
 
     put('./files/local_settings.py', '/opt/paysys/current/source/configuration/local_settings.py', use_sudo=True)
 
-    sudo('rm -rf /opt/paysys/current/source/rules')
     sudo('service supervisord restart')
     sudo('/opt/paysys/python/bin/supervisorctl restart payment')
     sudo('/opt/paysys/python/bin/supervisorctl restart celery')
@@ -127,13 +127,12 @@ def deploy(version='master'):
     sudo('/opt/paysys/python/bin/supervisorctl status payment')
     sudo('/opt/paysys/python/bin/supervisorctl status celery')
     sudo('/opt/paysys/python/bin/supervisorctl status celerybeat')
-    cleanupBuilds()
 
-@roles('application')
-def cleanupBuilds():
-    sudo('/bin/rm -rf `/bin/ls -t /opt/paysys/builds/ | /usr/bin/tail -n +5`')
-    sudo('/bin/rm -f /tmp/payment-*.tar.gz')
-    local('/bin/rm -f /tmp/payment-*.tar.gz')
+# @roles('application')
+# def cleanupBuilds():
+#     sudo('/bin/rm -rf `/bin/ls -t /opt/paysys/builds/ | /usr/bin/tail -n +5`')
+#     sudo('/bin/rm -f /tmp/payment-*.tar.gz')
+#     local('/bin/rm -f /tmp/payment-*.tar.gz')
 
 def syncReports(clean=True):
     execute(getReports)
