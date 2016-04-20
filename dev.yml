@@ -5,4 +5,4 @@ key_filename: .vagrant/machines/default/virtualbox/private_key
 roledefs:
   application:
     - 192.168.192.168
-sql_seedfile: files/seedDB.sql
+sql_seedfile: seedDB.sql

@@ -1,5 +1,17 @@
 # Paysys Vagrant environment
 
+DG Changes to this config:
+in dev.yml:
+	sql_seedfile: seedDB.sql
+in Vagrantfile:
+	change 2nd 8000 to 5000
+	config.vm.network "forwarded_port", guest: 8000, host: 5000
+in fabfile:
+	added me as superuser
+	sudo('mysql -e \'GRANT ALL ON *.* TO `deweyg`@`%` IDENTIFIED BY "zebra10"\'')
+
+
+
 ## Requirements
 
  - [Vagrant 1.8+](https://www.vagrantup.com/downloads.html)
