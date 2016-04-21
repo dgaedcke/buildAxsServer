@@ -34,8 +34,29 @@ def loadFullDb(filePath):
         put(filePath, '/tmp/seedDB.sql')
         sudo('mysql pay < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
 
+def wipe(db=True):
+    """
+    Removes the application and database from the host.
+
+    :param db: (bool) Wipe the database too. Default: True
+    """
+    with settings(warn_only=True):
+        sudo('/opt/paysys/python/bin/supervisorctl stop celery')
+        sudo('/opt/paysys/python/bin/supervisorctl stop celerybeat')
+        sudo('/opt/paysys/python/bin/supervisorctl stop payment')
+        sudo('rm -rf /opt/paysys')
+        sudo('userdel -r paysys')
+
+        if bool(db):
+            sql = (
+                "DROP DATABASE `pay`;"
+                "DROP USER `payApp`@localhost;"
+                "DROP USER `deweyg`@`%`;"
+            )
+            run("mysql -u root -e '%s'" % sql)
+
 @roles('application')
-def setup(wipe=False):
+def setup(force=False):
     """Sets up payment system"""
     dependencies = (
         "wget",
@@ -50,9 +71,8 @@ def setup(wipe=False):
         "npm"
     )
 
-    wipe = bool(wipe)
-    if wipe or not exists('/opt/paysys'):
-        sudo('rm -rf /opt/paysys')
+    if bool(force):
+        wipe()
 
     sudo('useradd -d /opt/paysys %s || true' % app_user)
     sudo('yum install -q -y %s' % ' '.join(dependencies))
@@ -85,7 +105,7 @@ def setup(wipe=False):
     sudo('service mysqld start')
     sudo('chkconfig mysqld on')
 
-    sudo('mysql -e \'CREATE DATABASE `pay` CHARACTER SET utf8 COLLATE utf8_general_ci\'')
+    sudo('mysql -e \'CREATE DATABASE IF NOT EXISTS `pay` CHARACTER SET utf8 COLLATE utf8_general_ci\'')
     sudo('mysql -e \'GRANT ALL ON pay.* TO `payApp`@localhost IDENTIFIED BY "apple1010"\'')
     sudo('mysql -e \'GRANT ALL ON *.* TO `deweyg`@`%` IDENTIFIED BY "zebra10"\'')
     if env.get('sql_seedfile', False):
