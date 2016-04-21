@@ -28,6 +28,12 @@ def loadenv(environment=None):
             for key, value in yaml_config.iteritems():
                 setattr(env, key, value)
 
+def loadFullDb(filePath):
+    # import see DB
+    if os.path.exists(filePath):
+        put(filePath, '/tmp/seedDB.sql')
+        sudo('mysql pay < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
+
 @roles('application')
 def setup(wipe=False):
     """Sets up payment system"""
@@ -83,9 +89,13 @@ def setup(wipe=False):
     sudo('mysql -e \'GRANT ALL ON pay.* TO `payApp`@localhost IDENTIFIED BY "apple1010"\'')
     sudo('mysql -e \'GRANT ALL ON *.* TO `deweyg`@`%` IDENTIFIED BY "zebra10"\'')
     if env.get('sql_seedfile', False):
-        if os.path.exists(env.sql_seedfile):
-            put(env.sql_seedfile, '/tmp/seedDB.sql')
-            sudo('mysql paysys < /tmp/seedDB.sql && rm -f /tmp/seedDB.sql')
+        loadFullDb(env.sql_seedfile)
+
+
+@roles('application')
+def loadData():
+    loadFullDb(env.sql_seedfile)
+
 
 @roles('application')
 def deploy(version='master'):
