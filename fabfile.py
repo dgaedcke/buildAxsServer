@@ -129,6 +129,8 @@ def deploy(version='master'):
 
     with settings(sudo_user=app_user), cd('/opt/paysys'):
         sudo('ssh-keyscan github.com >> ~/.ssh/known_hosts')
+        # remove existing dir or git wont clone into it
+        sudo('rm -rf /opt/paysys/current/')
         sudo('git clone git@github.com:dgaedcke/paymentSystem.git /opt/paysys/current')
         with cd('/opt/paysys/current'):
             sudo('git checkout %s' % version)
