@@ -81,7 +81,6 @@ def setup(force=False):
     if not exists('/opt/python2.7'):
         with cd('/tmp'):
             run('wget https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz')
-            run('wget https://bootstrap.pypa.io/get-pip.py')
             run('tar -xf Python-2.7.8.tgz')
         with cd('/tmp/Python-2.7.8'):
             run('./configure --prefix=/opt/python2.7')

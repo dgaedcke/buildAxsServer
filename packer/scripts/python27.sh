@@ -5,12 +5,11 @@ pushd .
 cd /tmp
 echo "=> Downloading Python $PYTHON_VERSION"
 wget "https://www.python.org/ftp/python/2.7.8/${PYTHON_NAME}.tgz"
-wget https://bootstrap.pypa.io/get-pip.py
 tar xf "${PYTHON_NAME}.tgz"
 cd "$PYTHON_NAME"
 echo "=> Compiling and installing Python $PYTHON_VERSION"
 ./configure --prefix=/opt/python2.7
 make -j5
 make install
-rm -rf "${PYTHON_NAME}.tgz" get-pip.py "${PYTHON_NAME}/"
+rm -rf "${PYTHON_NAME}.tgz" "${PYTHON_NAME}/"
 popd
