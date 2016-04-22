@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "wittman/centos-6.7"
+  config.vm.box = "axs-server"
   config.vm.box_check_update = false
 
   config.vm.provider "virtualbox" do |v|
