@@ -89,6 +89,12 @@ def setup(force=False):
             sudo('make install')
 
     with settings(sudo_user=app_user):
+        if not exists('/opt/paysys/ftp'):
+            # sudo('mkdir -p ftp/examiner')
+            # sudo('mkdir -p ftp/axs')
+            sudo('ln -sf ./ftp /opt/paysys/ftp')    # link from root ftp dir to where app expects it
+            # a more explicit version is:
+            # sudo('ln -sf /vagrant/ftp /opt/paysys/ftp')
         if not exists('/opt/paysys/python'):
             sudo('virtualenv -p /opt/python2.7/bin/python /opt/paysys/python')
         sudo('mkdir -p /opt/paysys/{logs,beat,uploads,rules} || true')
