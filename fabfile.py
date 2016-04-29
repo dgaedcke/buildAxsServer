@@ -136,6 +136,7 @@ def restartAll():
 def gitpull():
     with settings(sudo_user=app_user), cd('/opt/paysys/current'):
         sudo('ssh-keyscan github.com >> ~/.ssh/known_hosts')
+        sudo('git reset --hard HEAD')
         sudo('git pull')
     restartAll()
 
