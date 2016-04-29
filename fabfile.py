@@ -57,7 +57,7 @@ def wipe(db=True):
 
 @roles('application')
 def setup(force=False):
-    """Sets up payment system"""
+    """Sets up payment system;  run yum install for all of the following """
     dependencies = (
         "wget",
         "build-essential",
@@ -68,7 +68,8 @@ def setup(force=False):
         "python-virtualenv",
         "rabbitmq-server",
         "mysql-server",
-        "npm"
+        "npm",
+        "nano"
     )
 
     if bool(force):
@@ -121,6 +122,22 @@ def setup(force=False):
 def loadData():
     loadFullDb(env.sql_seedfile)
 
+def restartAll():
+    sudo('service supervisord restart')
+    sudo('/opt/paysys/python/bin/supervisorctl restart payment')
+    sudo('/opt/paysys/python/bin/supervisorctl restart celery')
+    sudo('/opt/paysys/python/bin/supervisorctl restart celerybeat')
+    sudo('/opt/paysys/python/bin/supervisorctl status payment')
+    sudo('/opt/paysys/python/bin/supervisorctl status celery')
+    sudo('/opt/paysys/python/bin/supervisorctl status celerybeat')
+
+
+@roles('application')
+def gitpull():
+    with cd('/opt/paysys/current'):
+        sudo('git pull')
+    restartAll()
+
 
 @roles('application')
 def deploy(version='master'):
@@ -156,14 +173,7 @@ def deploy(version='master'):
         sudo('bower install --config.interactive=false -s')
 
     put('./files/local_settings.py', '/opt/paysys/current/source/configuration/local_settings.py', use_sudo=True)
-
-    sudo('service supervisord restart')
-    sudo('/opt/paysys/python/bin/supervisorctl restart payment')
-    sudo('/opt/paysys/python/bin/supervisorctl restart celery')
-    sudo('/opt/paysys/python/bin/supervisorctl restart celerybeat')
-    sudo('/opt/paysys/python/bin/supervisorctl status payment')
-    sudo('/opt/paysys/python/bin/supervisorctl status celery')
-    sudo('/opt/paysys/python/bin/supervisorctl status celerybeat')
+    restartAll()
 
 # @roles('application')
 # def cleanupBuilds():
