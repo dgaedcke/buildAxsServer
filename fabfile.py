@@ -134,7 +134,8 @@ def restartAll():
 
 @roles('application')
 def gitpull():
-    with cd('/opt/paysys/current'):
+    with settings(sudo_user=app_user), cd('/opt/paysys/current'):
+        sudo('ssh-keyscan github.com >> ~/.ssh/known_hosts')
         sudo('git pull')
     restartAll()
 

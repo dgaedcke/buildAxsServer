@@ -1,16 +1,12 @@
 # Paysys Vagrant environment
 
-DG Changes to this config:
-in dev.yml:
-	sql_seedfile: seedDB.sql
-in Vagrantfile:
-	change 2nd 8000 to 5000
-	config.vm.network "forwarded_port", guest: 8000, host: 5000
-in fabfile:
-	added me as superuser
-	sudo('mysql -e \'GRANT ALL ON *.* TO `deweyg`@`%` IDENTIFIED BY "zebra10"\'')
 
-
+## Usage:
+	fab loadenv:dev gitpull
+	fab loadenv:dev loadData
+	will need to reset the dewey@minggl.com password to:
+	'pbkdf2:sha1:1000$X4xknZGM$fcf1c6a3dd929ad3ea096ece42761e523d150049' == apple
+	after reloading the DB
 
 ## Requirements
 
@@ -55,3 +51,14 @@ in fabfile:
 ## Database seedfile
 
 If `sql_seedfile` is specified in the `dev.yml` config, the file at this path will be uploaded and imported to the `pay` database before deploying the application.
+
+
+DG Changes to this config:
+in dev.yml:
+	sql_seedfile: seedDB.sql
+in Vagrantfile:
+	change 2nd 8000 to 5000
+	config.vm.network "forwarded_port", guest: 8000, host: 5000
+in fabfile:
+	added me as superuser
+	sudo('mysql -e \'GRANT ALL ON *.* TO `deweyg`@`%` IDENTIFIED BY "zebra10"\'')
