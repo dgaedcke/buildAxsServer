@@ -9,7 +9,7 @@ DB_ECHO = False
 # FILE system.
 PATH_PREFIX = '/opt/paysys/'
 PATH_WWW_DIR = PATH_PREFIX + 'www/'
-PATH_SOURCE_DIR = PATH_PREFIX + 'paySystem/source/'
+PATH_SOURCE_DIR = PATH_PREFIX + 'source/'
 PATH_JOB_DIR = PATH_SOURCE_DIR + 'jobs/'
 PATH_LOG_DIR = PATH_PREFIX + 'logs/'
 PATH_FTP_DIR = PATH_PREFIX + 'ftp/'
