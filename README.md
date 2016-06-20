@@ -2,9 +2,10 @@
 
 
 ## Usage:
+	# to pull the master branch, run this:
 	fab loadenv:dev gitpull
 	fab loadenv:dev loadData
-	will need to reset the dewey@minggl.com password to:
+	will need to reset the dewey@minggl.com password in the DB to:
 	'pbkdf2:sha1:1000$X4xknZGM$fcf1c6a3dd929ad3ea096ece42761e523d150049' == apple
 	after reloading the DB
 
@@ -22,7 +23,7 @@
     $ vagrant up
     ```
 
-  2. Run the Fabric task `deploy` against the newly created VM. We're also running the task `loadenv` with `dev` as an argument to load the `dev.yml` file which is also provided in this repository. This file specifies information such as the IP address of our Vagrant VM and the roles which it has defined. At the start of the deploy, you will be prompted for the passphrase for the SSH key provided in `files/id_deploy`.
+  2. Run the Fabric task `deploy` against the newly created VM. We're also running the task `loadenv` with `dev` as an argument to load the `dev.yml` (context) file which is also provided in this repository. This file specifies information such as the IP address of our Vagrant VM and the roles which it has defined. At the start of the deploy, you will be prompted for the passphrase for the SSH key provided in `files/id_deploy`.
 
     ```
     $ fab loadenv:dev deploy

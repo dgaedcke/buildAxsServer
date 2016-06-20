@@ -1,0 +1,8 @@
+--- need to customize this file
+user: vagrant
+hosts: 192.168.192.168
+key_filename: .vagrant/machines/default/virtualbox/private_key
+roledefs:
+  application:
+    - 192.168.192.168
+sql_seedfile: seedDB.sql
