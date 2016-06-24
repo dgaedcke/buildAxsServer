@@ -2,7 +2,8 @@
   "variables": {
     "iso_url": "http://mirror.rackspace.com/CentOS/6.7/isos/x86_64/CentOS-6.7-x86_64-minimal.iso",
     "iso_checksum": "9d3fec5897be6b3fed4d3dda80b8fa7bb62c616bbfd4bdcd27295ca9b764f498",
-    "iso_checksum_type": "sha256"
+    "iso_checksum_type": "sha256",
+    "digitalocean_api_key": "{{ env `DIGITALOCEAN_API_KEY` }}"
   },
 
   "builders": [{
@@ -33,6 +34,15 @@
       ["modifyvm", "{{.Name}}", "--cpus", "4"]
     ],
     "virtualbox_version_file": ".vbox_version"
+  },
+  {
+    "type": "digitalocean",
+    "api_token": "{{ user `digitalocean_api_key` }}",
+    "image": "centos-6-5-x64",
+    "ssh_pty": true,
+    "region": "nyc3",
+    "size": "1gb",
+    "snapshot_name": "axs-server-{{ timestamp }}"
   }],
 
   "provisioners": [
@@ -44,15 +54,17 @@
     {
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/base.sh",
+        "scripts/importdb.sh",
+        "scripts/python27.sh",
+        "scripts/cleanup.sh"
+      ],
       "override": {
         "virtualbox-iso": {
           "scripts": [
-            "scripts/base.sh",
             "scripts/vagrant.sh",
             "scripts/virtualbox.sh",
-            "scripts/importdb.sh",
-            "scripts/python27.sh",
-            "scripts/cleanup.sh",
             "scripts/zerodisk.sh"
           ]
         }
@@ -62,6 +74,7 @@
 
   "post-processors": [{
     "type": "vagrant",
+    "only": ["virtualbox-iso"],
     "keep_input_artifact": false
   }]
 }
