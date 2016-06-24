@@ -1,0 +1,6 @@
+Fabric==1.11.1
+PyYAML==3.11
+ecdsa==0.13
+paramiko==1.17.1
+pycrypto==2.6.1
+wsgiref==0.1.2
