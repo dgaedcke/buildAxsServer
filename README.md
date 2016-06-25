@@ -20,7 +20,7 @@
 
  - [vagrant-digitalocean](https://github.com/devopsgroup-io/vagrant-digitalocean)
 
-## Creating a development environment
+## VirtualBox
 
   1. Create the Virtualbox VM using Vagrant.
 
@@ -28,7 +28,7 @@
     $ vagrant up
     ```
 
-  2. Run the Fabric task `deploy` against the newly created VM. We're also running the task `loadenv` with `dev` as an argument to load the `dev.yml` (context) file which is also provided in this repository. This file specifies information such as the IP address of our Vagrant VM and the roles which it has defined. At the start of the deploy, you will be prompted for the passphrase for the SSH key provided in `files/id_deploy`.
+  2. Run the Fabric task `deploy` against the newly created VM. We're also running the task `loadenv` with `dev` as an argument to load the `dev.yml` (context) file which is also provided in this repository. This file specifies information such as the IP address of our Vagrant VM. At the start of the deploy, you will be prompted for the passphrase for the SSH key provided in `files/id_deploy`.
 
     ```
     $ fab loadenv:dev deploy
@@ -78,6 +78,12 @@ Now, you should be able to run `vagrant up` using the DigitalOcean provider:
 
 ```
 $ vagrant up --provider=digital_ocean
+```
+
+After the new droplet comes online, retrieve the IP address of the host which it created from the output and run the `deploy` fabric task against the host with:
+
+```
+$ fab -H <droplet-ip> deploy
 ```
 
 #### SSH Keys on DigitalOcean
