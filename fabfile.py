@@ -9,10 +9,13 @@ from fabric.api import run, cd, env, lcd, sudo, put, local
 from fabric.context_managers import settings, prefix
 from fabric.contrib.files import exists
 from fabric.contrib.project import rsync_project
-from fabric.decorators import roles
+
+# The user which fabric connects as
+env.user = 'vagrant'
+# The user which the application runs as
+app_user = 'paysys'
 
 env.activate = 'source /opt/paysys/python/bin/activate'
-app_user = 'paysys'
 
 @_contextmanager
 def virtualenv():
@@ -55,7 +58,6 @@ def wipe(db=True):
             )
             run("mysql -u root -e '%s'" % sql)
 
-@roles('application')
 def setup(force=False):
     """Sets up payment system;  run yum install for all of the following """
     dependencies = (
@@ -118,7 +120,6 @@ def setup(force=False):
         loadFullDb(env.sql_seedfile)
 
 
-@roles('application')
 def loadData():
     loadFullDb(env.sql_seedfile)
 
@@ -132,7 +133,6 @@ def restartAll():
     sudo('/opt/paysys/python/bin/supervisorctl status celerybeat')
 
 
-@roles('application')
 def gitpull():
     with settings(sudo_user=app_user), cd('/opt/paysys/current'):
         sudo('ssh-keyscan github.com >> ~/.ssh/known_hosts')
@@ -141,7 +141,6 @@ def gitpull():
     restartAll()
 
 
-@roles('application')
 def deploy(version='master'):
     """Deploys payment code to application server"""
     if not exists('/opt/paysys'):
@@ -177,7 +176,6 @@ def deploy(version='master'):
     put('./files/local_settings.py', '/opt/paysys/current/source/configuration/local_settings.py', use_sudo=True)
     restartAll()
 
-# @roles('application')
 # def cleanupBuilds():
 #     sudo('/bin/rm -rf `/bin/ls -t /opt/paysys/builds/ | /usr/bin/tail -n +5`')
 #     sudo('/bin/rm -f /tmp/payment-*.tar.gz')
@@ -190,7 +188,6 @@ def syncReports(clean=True):
     if clean:
         execute(cleanReports)
 
-@roles('reports')
 def getReports():
     rsync_project('/incoming/exftp/payments/examiner/' + env.config['environment'] + '/', 'examiner', upload=False)
     rsync_project('/incoming/exftp/payments/axs/' + env.config['environment'] + '/', 'axs', upload=False)
@@ -200,7 +197,6 @@ def getReports():
         rsync_project('/incoming/exftp/payments/axs/prod/', 'axs', upload=False)
         rsync_project('/incoming/exftp/payments/rowdy/prod/', 'rowdy', upload=False)
 
-@roles('application')
 def sendReports():
     rsync_project('/opt/paysys/ftp/examiner/', 'examiner/', upload=True)
     rsync_project('/opt/paysys/ftp/axs/', 'axs/', upload=True)
@@ -208,13 +204,11 @@ def sendReports():
     sudo('/bin/find /opt/paysys/ftp -user "jenkins" -exec /bin/chgrp paysys {} \;')
     sudo('/bin/find /opt/paysys/ftp -user "jenkins" -exec /bin/chmod g+rw {} \;')
 
-@roles('reports')
 def archiveReports():
     backup_time =  time.strftime('%Y%m%d%H%M%S')
     sudo('/bin/mkdir -p /backups', shell=False)
     sudo('/bin/tar -czvf /backups/payments-' + env.config['environment'] + '-' + backup_time + '.tar.gz  /incoming/exftp/payments/*/' + env.config['environment'] + '', shell=False)
 
-@roles('reports')
 def cleanReports():
     sudo('/bin/rm -rf /incoming/exftp/payments/examiner/' + env.config['environment'] + '/*', shell=False)
     sudo('/bin/rm -rf /incoming/exftp/payments/axs/' + env.config['environment'] + '/*', shell=False)
