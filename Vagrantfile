@@ -4,7 +4,9 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "axs-server"
   config.vm.box_check_update = false
-  config.vm.hostname = "axs-server"
+  config.vm.hostname = "vagrant-axs-server"
+
+  config.ssh.username = "vagrant"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
@@ -20,8 +22,9 @@ Vagrant.configure(2) do |config|
 
     d.token = ENV["DIGITALOCEAN_API_KEY"]
     d.ssh_key_name = ENV["DIGITALOCEAN_SSH_KEY"] || "Vagrant"
-    d.image = "centos-6-5-x64"
-    d.region = "nyc2"
+    # Image IDs are retrievable with `vagrant digitalocean-list images $DIGITALOCEAN_API_KEY`
+    d.image = "18084429" # axs-server-1466806201
+    d.region = "nyc3"
     d.size = "1gb"
   end
 
