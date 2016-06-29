@@ -1,7 +1,7 @@
 {
   "variables": {
-    "iso_url": "http://mirror.rackspace.com/CentOS/6.7/isos/x86_64/CentOS-6.7-x86_64-minimal.iso",
-    "iso_checksum": "9d3fec5897be6b3fed4d3dda80b8fa7bb62c616bbfd4bdcd27295ca9b764f498",
+    "iso_url": "http://mirror.rackspace.com/CentOS/6.8/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+    "iso_checksum": "ec49c297d484b9da0787e5944edc38f7c70f21c0f6a60178d8e9a8926d1949f4",
     "iso_checksum_type": "sha256",
     "digitalocean_api_key": "{{ env `DIGITALOCEAN_API_KEY` }}"
   },
@@ -22,7 +22,7 @@
       "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
     ],
     "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
-    "shutdown_timeout": "10s",
+    "shutdown_timeout": "90s",
     "ssh_username": "vagrant",
     "ssh_password": "vagrant",
     "ssh_port": 22,
@@ -63,8 +63,12 @@
       "override": {
         "virtualbox-iso": {
           "scripts": [
+            "scripts/base.sh",
+            "scripts/importdb.sh",
+            "scripts/python27.sh",
             "scripts/vagrant.sh",
             "scripts/virtualbox.sh",
+            "scripts/cleanup.sh",
             "scripts/zerodisk.sh"
           ]
         }
